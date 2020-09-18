@@ -7,8 +7,12 @@ namespace Il2CppDumper
     {
         private DataSection[] dataSections;
 
-        public WebAssembly(Stream stream) : base(stream)
+        private Action<string> reportProgressAction;
+
+        public WebAssembly(Stream stream, Action<string> reportProgressAction) : base(stream)
         {
+	        this.reportProgressAction = reportProgressAction;
+
             Is32Bit = true;
             var magic = ReadUInt32();
             var version = ReadInt32();
@@ -53,7 +57,7 @@ namespace Il2CppDumper
                 stream.Position = dataSection.Offset;
                 stream.Write(dataSection.Data, 0, dataSection.Data.Length);
             }
-            return new WebAssemblyMemory(stream, Is32Bit);
+            return new WebAssemblyMemory(stream, Is32Bit, reportProgressAction);
         }
     }
 }

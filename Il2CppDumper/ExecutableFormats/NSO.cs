@@ -16,7 +16,7 @@ namespace Il2CppDumper
         private bool isCompressed => isTextCompressed || isRoDataCompressed || isDataCompressed;
 
 
-        public NSO(Stream stream) : base(stream)
+        public NSO(Stream stream, Action<string> reportProgressAction) : base(stream, reportProgressAction)
         {
             header = new NSOHeader();
             header.Magic = ReadUInt32();
@@ -200,7 +200,7 @@ namespace Il2CppDumper
                 }
                 writer.Flush();
                 unCompressedStream.Position = 0;
-                return new NSO(unCompressedStream);
+                return new NSO(unCompressedStream, reportProgressAction);
             }
             return this;
         }

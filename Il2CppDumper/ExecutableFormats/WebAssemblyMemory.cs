@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Il2CppDumper
 {
     public sealed class WebAssemblyMemory : Il2Cpp
     {
-        public WebAssemblyMemory(Stream stream, bool is32Bit) : base(stream)
+        public WebAssemblyMemory(Stream stream, bool is32Bit, Action<string> reportProgressAction) : base(stream, reportProgressAction)
         {
             Is32Bit = is32Bit;
         }

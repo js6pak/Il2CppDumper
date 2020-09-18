@@ -14,7 +14,7 @@ namespace Il2CppDumper
         private static readonly byte[] FeatureBytes2 = { 0x78, 0x44, 0x79, 0x44 };//ADD R0, PC and ADD R1, PC
         private ulong vmaddr;
 
-        public Macho(Stream stream) : base(stream)
+        public Macho(Stream stream, Action<string> reportProgressAction) : base(stream, reportProgressAction)
         {
             Is32Bit = true;
             Position += 16; //skip magic, cputype, cpusubtype, filetype
@@ -60,7 +60,7 @@ namespace Il2CppDumper
                         var cryptID = ReadUInt32();
                         if (cryptID != 0)
                         {
-                            Console.WriteLine("ERROR: This Mach-O executable is encrypted and cannot be processed.");
+                            reportProgressAction("ERROR: This Mach-O executable is encrypted and cannot be processed.");
                         }
                         break;
                 }
@@ -113,8 +113,8 @@ namespace Il2CppDumper
                                 Position = rsubaddr + 14;
                                 buff = buff.Concat(ReadBytes(4)).ToArray();
                                 var codeRegistration = DecodeMov(buff) + subaddr + 22u;
-                                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+                                reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+                                reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                                 Init(codeRegistration, metadataRegistration);
                                 return true;
                             }
@@ -153,8 +153,8 @@ namespace Il2CppDumper
                                 Position = rsubaddr + 14;
                                 buff = buff.Concat(ReadBytes(4)).ToArray();
                                 var codeRegistration = DecodeMov(buff) + subaddr + 26u;
-                                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+                                reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+                                reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                                 Init(codeRegistration, metadataRegistration);
                                 return true;
                             }

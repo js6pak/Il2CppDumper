@@ -21,7 +21,7 @@ namespace Il2CppDumper
             il2Cpp = il2CppExecutor.il2Cpp;
         }
 
-        public void Decompile(Config config, string outputDir)
+        public void Decompile(Config config, string outputDir, Action<string> reportProgressAction)
         {
             var writer = new StreamWriter(new FileStream(outputDir + "dump.cs", FileMode.Create), new UTF8Encoding(false));
             //dump image
@@ -370,7 +370,7 @@ namespace Il2CppDumper
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Some errors in dumping");
+                    reportProgressAction("ERROR: Some errors in dumping");
                     writer.Write("/*");
                     writer.Write(e);
                     writer.Write("*/\n}\n");

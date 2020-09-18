@@ -15,7 +15,7 @@ namespace Il2CppDumper
         private Elf64_Shdr[] sectionTable;
         private Elf64_Phdr pt_dynamic;
 
-        public Elf64(Stream stream) : base(stream)
+        public Elf64(Stream stream, Action<string> reportProgressAction) : base(stream, reportProgressAction)
         {
             elfHeader = ReadClass<Elf64_Ehdr>();
             programSegment = ReadClassArray<Elf64_Phdr>(elfHeader.e_phoff, elfHeader.e_phnum);
@@ -39,7 +39,7 @@ namespace Il2CppDumper
                 RelocationProcessing();
                 if (CheckProtection())
                 {
-                    Console.WriteLine("ERROR: This file may be protected.");
+                    reportProgressAction("ERROR: This file may be protected.");
                 }
             }
         }
@@ -133,13 +133,13 @@ namespace Il2CppDumper
             }
             if (codeRegistration > 0 && metadataRegistration > 0)
             {
-                Console.WriteLine("Detected Symbol !");
-                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+                reportProgressAction("Detected Symbol !");
+                reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+                reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                 Init(codeRegistration, metadataRegistration);
                 return true;
             }
-            Console.WriteLine("ERROR: No symbol is detected");
+            reportProgressAction("ERROR: No symbol is detected");
             return false;
         }
 
@@ -160,7 +160,7 @@ namespace Il2CppDumper
 
         private void RelocationProcessing()
         {
-            Console.WriteLine("Applying relocations...");
+            reportProgressAction("Applying relocations...");
             try
             {
                 var relaOffset = MapVATR(dynamicSection.First(x => x.d_tag == DT_RELA).d_un);
@@ -199,7 +199,7 @@ namespace Il2CppDumper
             //.init_proc
             if (dynamicSection.Any(x => x.d_tag == DT_INIT))
             {
-                Console.WriteLine("WARNING: find .init_proc");
+                reportProgressAction("WARNING: find .init_proc");
                 return true;
             }
             //JNI_OnLoad
@@ -210,13 +210,13 @@ namespace Il2CppDumper
                 switch (name)
                 {
                     case "JNI_OnLoad":
-                        Console.WriteLine("WARNING: find JNI_OnLoad");
+                        reportProgressAction("WARNING: find JNI_OnLoad");
                         return true;
                 }
             }
             if (sectionTable != null && sectionTable.Any(x => x.sh_type == SHT_LOUSER))
             {
-                Console.WriteLine("WARNING: find SHT_LOUSER section");
+                reportProgressAction("WARNING: find SHT_LOUSER section");
                 return true;
             }
             return false;
