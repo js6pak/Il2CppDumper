@@ -15,11 +15,11 @@ namespace Il2CppDumper
 	        reportProgressAction("Dumping...");
 	        var executor = new Il2CppExecutor(metadata, il2Cpp);
 	        var decompiler = new Il2CppDecompiler(executor);
-	        decompiler.Decompile(config, outputDirectoryPath, reportProgressAction);
 	        reportProgressAction("Done!");
 	        if (config.GenerateScript)
 	        {
-		        reportProgressAction("Generate script...");
+		        decompiler.Decompile(config, outputDirectoryPath, reportProgressAction);
+                reportProgressAction("Generate script...");
 		        var scriptGenerator = new ScriptGenerator(executor);
 		        scriptGenerator.WriteScript(outputDirectoryPath);
 		        reportProgressAction("Done!");
