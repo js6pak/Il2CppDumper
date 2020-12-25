@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿//using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -276,7 +276,7 @@ namespace Il2CppDumper
                     value = x.Value,
                     address = $"0x{x.Address:X}"
                 }).ToArray();
-                File.WriteAllText(outputDir + "stringliteral.json", JsonConvert.SerializeObject(stringLiterals, Formatting.Indented), new UTF8Encoding(false));
+                //File.WriteAllText(outputDir + "stringliteral.json", JsonConvert.SerializeObject(stringLiterals, Formatting.Indented), new UTF8Encoding(false));
                 foreach (var i in metadata.metadataUsageDic[6]) //kIl2CppMetadataUsageMethodRef
                 {
                     var methodSpec = il2Cpp.methodSpecs[i.Value];
@@ -323,7 +323,7 @@ namespace Il2CppDumper
                 orderedPointers[i] = il2Cpp.GetRVA(orderedPointers[i]);
             }
             json.Addresses = orderedPointers;
-            File.WriteAllText(outputDir + "script.json", JsonConvert.SerializeObject(json, Formatting.Indented));
+            //File.WriteAllText(outputDir + "script.json", JsonConvert.SerializeObject(json, Formatting.Indented));
             //il2cpp.h
             for (int i = 0; i < genericClassList.Count; i++)
             {
@@ -361,7 +361,7 @@ namespace Il2CppDumper
                     sb.Append(HeaderConstants.HeaderV27);
                     break;
                 default:
-                    Console.WriteLine($"WARNING: This il2cpp version [{il2Cpp.Version}] does not support generating .h files");
+                    //reportProgressAction($"WARNING: This il2cpp version [{il2Cpp.Version}] does not support generating .h files");
                     return;
             }
             sb.Append(headerStruct);

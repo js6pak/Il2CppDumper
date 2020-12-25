@@ -11,18 +11,21 @@ namespace Il2CppDumper
     {
         public static void Export(Il2CppExecutor il2CppExecutor, string outputDir)
         {
-            Directory.SetCurrentDirectory(outputDir);
-            if (Directory.Exists("DummyDll"))
-                Directory.Delete("DummyDll", true);
-            Directory.CreateDirectory("DummyDll");
-            Directory.SetCurrentDirectory("DummyDll");
+	        string dummyDllPath = Path.Combine(outputDir, "DummyDll");
+
+            if (Directory.Exists(dummyDllPath))
+                Directory.Delete(dummyDllPath, true);
+            Directory.CreateDirectory(dummyDllPath);
+
             var dummy = new DummyAssemblyGenerator(il2CppExecutor);
             foreach (var assembly in dummy.Assemblies)
             {
-                using (var stream = new MemoryStream())
+	            string path = Path.Combine(dummyDllPath, assembly.MainModule.Name);
+
+                using (var stream = new FileStream(path, FileMode.Create))
                 {
                     assembly.Write(stream);
-                    File.WriteAllBytes(assembly.MainModule.Name, stream.ToArray());
+                    assembly.Dispose();
                 }
             }
         }

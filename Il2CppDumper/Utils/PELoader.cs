@@ -11,7 +11,7 @@ namespace Il2CppDumper
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private extern static IntPtr LoadLibrary(string path);
 
-        public static PE Load(string fileName)
+        public static PE Load(string fileName, Action<string> reportProgressAction)
         {
             var buff = File.ReadAllBytes(fileName);
             using (var reader = new BinaryStream(new MemoryStream(buff)))
@@ -30,7 +30,7 @@ namespace Il2CppDumper
                 if ((fileHeader.Machine == 0x14c && Environment.Is64BitProcess) //64bit process can't load 32bit dll
                     || (fileHeader.Machine == 0x8664 && !Environment.Is64BitProcess)) //32bit process can't load 64bit dll
                 {
-                    return new PE(new MemoryStream(buff));
+                    return new PE(new MemoryStream(buff), reportProgressAction);
                 }
                 var pos = reader.Position;
                 reader.Position = pos + fileHeader.SizeOfOptionalHeader;
@@ -43,7 +43,7 @@ namespace Il2CppDumper
                 {
                     //Missing dependent DLL
                     //throw new Win32Exception();
-                    return new PE(new MemoryStream(buff));
+                    return new PE(new MemoryStream(buff), reportProgressAction);
                 }
                 foreach (var section in sections)
                 {
@@ -65,7 +65,7 @@ namespace Il2CppDumper
                 writer.Flush();
                 writer.Close();
                 peMemory.Position = 0;
-                var pe = new PE(peMemory);
+                var pe = new PE(peMemory, reportProgressAction);
                 pe.LoadFromMemory((ulong)handle.ToInt64());
                 return pe;
             }

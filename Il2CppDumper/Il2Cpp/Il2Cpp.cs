@@ -31,12 +31,17 @@ namespace Il2CppDumper
         public Dictionary<string, ulong[]> codeGenModuleMethodPointers;
         public Dictionary<string, Dictionary<uint, Il2CppRGCTXDefinition[]>> rgctxsDictionary;
 
+        protected Action<string> reportProgressAction;
+
         public abstract ulong MapVATR(ulong uiAddr);
         public abstract bool Search();
         public abstract bool PlusSearch(int methodCount, int typeDefinitionsCount);
         public abstract bool SymbolSearch();
 
-        protected Il2Cpp(Stream stream) : base(stream) { }
+        protected Il2Cpp(Stream stream, Action<string> reportProgressAction) : base(stream)
+        {
+	        this.reportProgressAction = reportProgressAction;
+        }
 
         public void SetProperties(float version, long maxMetadataUsages)
         {
@@ -58,16 +63,16 @@ namespace Il2CppDumper
                     {
                         Version = 24.3f;
                         codeRegistration -= Is32Bit ? 8u : 16u;
-                        Console.WriteLine($"Change il2cpp version to: {Version}");
+                        reportProgressAction($"Change il2cpp version to: {Version}");
                     }
                 }
-                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+                reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+                reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                 Init(codeRegistration, metadataRegistration);
                 return true;
             }
-            Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-            Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+            reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+            reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
             return false;
         }
 
@@ -79,7 +84,7 @@ namespace Il2CppDumper
                 if (pCodeRegistration.codeGenModules == 0) //TODO
                 {
                     Version = 24.3f;
-                    Console.WriteLine($"Change il2cpp version to: {Version}");
+                    reportProgressAction($"Change il2cpp version to: {Version}");
                     pCodeRegistration = MapVATR<Il2CppCodeRegistration>(codeRegistration);
                 }
             }

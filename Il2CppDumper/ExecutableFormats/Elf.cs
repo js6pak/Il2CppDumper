@@ -23,7 +23,7 @@ namespace Il2CppDumper
         private static readonly string ARMFeatureBytes = "? 0x10 ? 0xE7 ? 0x00 ? 0xE0 ? 0x20 ? 0xE0";
         private static readonly string X86FeatureBytes = "? 0x10 ? 0xE7 ? 0x00 ? 0xE0 ? 0x20 ? 0xE0"; //TODO
 
-        public Elf(Stream stream) : base(stream)
+        public Elf(Stream stream, Action<string> reportProgressAction) : base(stream, reportProgressAction)
         {
             Is32Bit = true;
             elfHeader = ReadClass<Elf32_Ehdr>();
@@ -48,7 +48,7 @@ namespace Il2CppDumper
                 RelocationProcessing();
                 if (CheckProtection())
                 {
-                    Console.WriteLine("ERROR: This file may be protected.");
+                    reportProgressAction("ERROR: This file may be protected.");
                 }
             }
         }
@@ -130,8 +130,8 @@ namespace Il2CppDumper
                         metadataRegistration = ReadUInt32();
                     }
                 }
-                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+                reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+                reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                 Init(codeRegistration, metadataRegistration);
                 return true;
             }
@@ -193,13 +193,13 @@ namespace Il2CppDumper
             }
             if (codeRegistration > 0 && metadataRegistration > 0)
             {
-                Console.WriteLine("Detected Symbol !");
-                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+                reportProgressAction("Detected Symbol !");
+                reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+                reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                 Init(codeRegistration, metadataRegistration);
                 return true;
             }
-            Console.WriteLine("ERROR: No symbol is detected");
+            reportProgressAction("ERROR: No symbol is detected");
             return false;
         }
 
@@ -220,7 +220,7 @@ namespace Il2CppDumper
 
         private void RelocationProcessing()
         {
-            Console.WriteLine("Applying relocations...");
+            reportProgressAction("Applying relocations...");
             try
             {
                 var reldynOffset = MapVATR(dynamicSection.First(x => x.d_tag == DT_REL).d_un);
@@ -255,7 +255,7 @@ namespace Il2CppDumper
             //.init_proc
             if (dynamicSection.Any(x => x.d_tag == DT_INIT))
             {
-                Console.WriteLine("WARNING: find .init_proc");
+                reportProgressAction("WARNING: find .init_proc");
                 return true;
             }
             //JNI_OnLoad
@@ -266,13 +266,13 @@ namespace Il2CppDumper
                 switch (name)
                 {
                     case "JNI_OnLoad":
-                        Console.WriteLine("WARNING: find JNI_OnLoad");
+                        reportProgressAction("WARNING: find JNI_OnLoad");
                         return true;
                 }
             }
             if (sectionTable != null && sectionTable.Any(x => x.sh_type == SHT_LOUSER))
             {
-                Console.WriteLine("WARNING: find SHT_LOUSER section");
+                reportProgressAction("WARNING: find SHT_LOUSER section");
                 return true;
             }
             return false;

@@ -14,7 +14,7 @@ namespace Il2CppDumper
         private static readonly byte[] FeatureBytes2 = { 0x3, 0x0, 0x80, 0x52 };//MOV W3, #0
         private ulong vmaddr;
 
-        public Macho64(Stream stream) : base(stream)
+        public Macho64(Stream stream, Action<string> reportProgressAction) : base(stream, reportProgressAction)
         {
             Position += 16; //skip magic, cputype, cpusubtype, filetype
             var ncmds = ReadUInt32();
@@ -59,7 +59,7 @@ namespace Il2CppDumper
                         var cryptID = ReadUInt32();
                         if (cryptID != 0)
                         {
-                            Console.WriteLine("ERROR: This Mach-O executable is encrypted and cannot be processed.");
+                            reportProgressAction("ERROR: This Mach-O executable is encrypted and cannot be processed.");
                         }
                         break;
                 }
@@ -215,8 +215,8 @@ namespace Il2CppDumper
             }
             if (codeRegistration != 0 && metadataRegistration != 0)
             {
-                Console.WriteLine("CodeRegistration : {0:x}", codeRegistration);
-                Console.WriteLine("MetadataRegistration : {0:x}", metadataRegistration);
+	            reportProgressAction($"CodeRegistration : {codeRegistration:x}");
+	            reportProgressAction($"MetadataRegistration : {metadataRegistration:x}");
                 Init(codeRegistration, metadataRegistration);
                 return true;
             }
